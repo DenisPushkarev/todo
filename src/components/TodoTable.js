@@ -11,6 +11,7 @@ import {
   TableRow,
   TableSortLabel,
   Paper,
+  IconButton,
   // TableFooter,
   // TablePagination,
   Button,
@@ -141,25 +142,35 @@ class TodoTable extends Component {
 
   reverseSort = (dir) => (dir === 'asc' ? 'desc' : 'asc')
 
-  listTasks = (tasks) =>
-    (tasks.map(task => (
-      <TableRow key={task.id}>
-        <TableCell padding="checkbox">
-          {!task.isDone && <TripOriginIcon color="primary" onClick={() => this.onMarkTaskAsDone(task.id)} />}
-          {task.isDone && <CheckIcon color="disabled" onClick={() => this.onMarkTaskAsDone(task.id)} />}
-        </TableCell>
-        <TableCell style={{ width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center' }} >
-            <div onClick={() => this.onStartEditTask(task.id)} style={task.isDone ? { textDecoration: 'line-through' } : {}}>{task.text}</div>
-            <div style={{ flexGrow: '1', }} />
-            <ClearIcon color='secondary' style={{ cursor: 'pointer' }} onClick={() => this.onDeleteTaskClick(task.id)} />
-          </div>
-        </TableCell>
-      </TableRow>
-    )))
+  listTasks = (tasks) => (tasks.map(task => (
+    <TableRow key={task.id}>
+      <TableCell padding="checkbox">
+        {!task.isDone &&
+          <IconButton aria-label="Mark as active" onClick={() => this.onMarkTaskAsDone(task.id)}>
+            <TripOriginIcon color="primary" />
+          </IconButton>}
+
+        {task.isDone &&
+          <IconButton aria-label="Mark as done" onClick={() => this.onMarkTaskAsDone(task.id)}>
+            <CheckIcon color="disabled" />
+          </IconButton>
+        }
+      </TableCell>
+      <TableCell style={{ width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }} >
+          <div onClick={() => this.onStartEditTask(task.id)} style={task.isDone ? { textDecoration: 'line-through' } : {}}>{task.text}</div>
+          <div style={{ flexGrow: '1', }} />
+          <IconButton aria-label="Delete" onClick={() => this.onDeleteTaskClick(task.id)}>
+            <ClearIcon color='primary' style={{ cursor: 'pointer' }} />
+          </IconButton>
+        </div>
+      </TableCell>
+    </TableRow >
+  )))
 
   render() {
-    const { showEditTaskDialog, sort } = this.state;
+    const { showEditTaskDialog, sort, tasks } = this.state;
+    const hasTasks = tasks.length > 0;
     return (
       <Paper>
         <Toolbar>
@@ -167,7 +178,7 @@ class TodoTable extends Component {
             <h1>Tasks</h1>
             <div>
               <Button color="primary" onClick={this.onCreateTaskClick}>Add new task</Button>
-              <EditTaskDialog open={showEditTaskDialog} isNew onCancel={this.onCancelEdit} onChange={this.onTaskChange} onSave={this.onSaveTask} value={this.state.task.text} />
+              <EditTaskDialog open={showEditTaskDialog} isNew={!this.state.task.id} onCancel={this.onCancelEdit} onChange={this.onTaskChange} onSave={this.onSaveTask} value={this.state.task.text} />
             </div>
           </div>
           <div style={{ flexGrow: '1', }}></div>
@@ -178,7 +189,8 @@ class TodoTable extends Component {
 
           </div> */}
         </Toolbar>
-        <Table>
+        {!hasTasks && <div>No task yet, enjoy your time or <Button onClick={this.onCreateTaskClick}>add task right now!</Button></div>}
+        {hasTasks && <Table>
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox" />
@@ -200,9 +212,7 @@ class TodoTable extends Component {
               </TableCell>
             </TableRow>
           </TableHead>
-          <TableBody>
-            {this.listTasks(this.state.tasks)}
-          </TableBody>
+          <TableBody>{this.listTasks(this.state.tasks)}</TableBody>
           {/* <TableFooter>
             <TableRow>
               <TablePagination
@@ -216,6 +226,7 @@ class TodoTable extends Component {
             </TableRow>
           </TableFooter> */}
         </Table>
+        }
       </Paper >
     )
   }
